@@ -159,40 +159,63 @@ const Link = ({ active, children, onClick }) => {
 };
 
 // Container component
-class FilterLink extends React.Component {
-	componentDidMount() {
-		const { store } = this.context;
-		this.unsubscribe = store.subscribe(() => {
-			this.forceUpdate();
-		});
-	}
+// class FilterLink extends React.Component {
+// 	componentDidMount() {
+// 		const { store } = this.context;
+// 		this.unsubscribe = store.subscribe(() => {
+// 			this.forceUpdate();
+// 		});
+// 	}
 
-	componentWillUnmount() {
-		this.unsubscribe();
-	}
+// 	componentWillUnmount() {
+// 		this.unsubscribe();
+// 	}
 
-	render() {
-		const props = this.props;
-		const { store } = this.context;
-		const state = store.getState();
-		return (
-			<Link
-				active={props.filter === state.visibilityFilter}
-				onClick={() =>
-					store.dispatch({
-						type: "SET_VISIBILITY_FILTER",
-						filter: props.filter
-					})
-				}
-			>
-				{props.children}
-			</Link>
-		);
-	}
-}
-FilterLink.contextTypes = {
-	store: PropTypes.object
+// 	render() {
+// 		const props = this.props;
+// 		const { store } = this.context;
+// 		const state = store.getState();
+// 		return (
+// 			<Link
+// 				active={props.filter === state.visibilityFilter}
+// 				onClick={() =>
+// 					store.dispatch({
+// 						type: "SET_VISIBILITY_FILTER",
+// 						filter: props.filter
+// 					})
+// 				}
+// 			>
+// 				{props.children}
+// 			</Link>
+// 		);
+// 	}
+// }
+// FilterLink.contextTypes = {
+// 	store: PropTypes.object
+// };
+
+/** Generating FilterLink container component from connect curried function */
+const mapStateToLinkProps = (state, ownProps) => {
+	return {
+		active: ownProps.filter === state.visibilityFilter
+	};
 };
+
+const mapDispatchToLinkProps = (dispatch, ownProps) => {
+	return {
+		onClick: () => {
+			dispatch({
+				type: "SET_VISIBILITY_FILTER",
+				filter: ownProps.filter
+			});
+		}
+	};
+};
+
+const FilterLink = connect(
+	mapStateToLinkProps,
+	mapDispatchToLinkProps
+)(Link);
 
 // presentational component
 const Todo = ({ onClick, completed, text }) => {
@@ -224,7 +247,7 @@ const TodoList = ({ todos, onTodoClick }) => {
 /** Presentational component
  * 1> functional component -> first argument = props
  * second argument = props
- * 2> 
+ * 2>
  */
 let AddTodo = ({ dispatch }) => {
 	let input;
@@ -263,24 +286,24 @@ AddTodo = connect(
 		return {};
 	},
 	dispatch => {
-		return {dispatch};
+		return { dispatch };
 	}
 )(AddTodo);
 
 /** AddTodo Container component
- * 1> no need to subscribe to the store as the component doesn't 
+ * 1> no need to subscribe to the store as the component doesn't
  * need any props
  * 2> second argument => callback that returns dispatch
  */
 AddTodo = connect(
 	null,
 	dispatch => {
-		return {dispatch};
+		return { dispatch };
 	}
 )(AddTodo);
 
 /** AddTodo Container component
- * 1> no need to subscribe to the store as the component doesn't 
+ * 1> no need to subscribe to the store as the component doesn't
  * need any props
  * 2> second argument => returning null or an empty object is fine as
  * connect automatically injects dispatch in the container component
@@ -292,8 +315,6 @@ AddTodo = connect(
 )(AddTodo);
 
 AddTodo = connect()(AddTodo);
-
-
 
 // presentational component
 const Footer = () => {
