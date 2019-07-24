@@ -5,8 +5,8 @@ import * as serviceWorker from "./serviceWorker";
 import expect from "expect";
 import deepFreeze from "deep-freeze";
 import { createStore, combineReducers } from "redux";
-import PropTypes from 'prop-types';
-import { Provider, connect } from 'react-redux';
+import PropTypes from "prop-types";
+import { Provider, connect } from "react-redux";
 
 const todo = (state, action) => {
 	switch (action.type) {
@@ -192,7 +192,7 @@ class FilterLink extends React.Component {
 }
 FilterLink.contextTypes = {
 	store: PropTypes.object
-}
+};
 
 // presentational component
 const Todo = ({ onClick, completed, text }) => {
@@ -221,10 +221,13 @@ const TodoList = ({ todos, onTodoClick }) => {
 	);
 };
 
-//presentational component
-const AddTodo = (props,{ store }) => {
+/** Presentational component
+ * 1> functional component -> first argument = props
+ * second argument = props
+ * 2> 
+ */
+let AddTodo = ({ dispatch }) => {
 	let input;
-
 	return (
 		<div>
 			<input
@@ -234,7 +237,7 @@ const AddTodo = (props,{ store }) => {
 			/>
 			<button
 				onClick={() => {
-					store.dispatch({
+					dispatch({
 						type: "ADD_TODO",
 						id: nextTodoId++,
 						text: input.value
@@ -247,24 +250,58 @@ const AddTodo = (props,{ store }) => {
 		</div>
 	);
 };
-AddTodo.contextTypes = {
-	store: PropTypes.object
-}
+// AddTodo.contextTypes = {
+// 	store: PropTypes.object
+// };
+
+/** AddTodo Container component
+ * 1> first argument => state that returns props
+ * 2> second argument => callback that returns dispatch
+ */
+AddTodo = connect(
+	state => {
+		return {};
+	},
+	dispatch => {
+		return {dispatch};
+	}
+)(AddTodo);
+
+/** AddTodo Container component
+ * 1> no need to subscribe to the store as the component doesn't 
+ * need any props
+ * 2> second argument => callback that returns dispatch
+ */
+AddTodo = connect(
+	null,
+	dispatch => {
+		return {dispatch};
+	}
+)(AddTodo);
+
+/** AddTodo Container component
+ * 1> no need to subscribe to the store as the component doesn't 
+ * need any props
+ * 2> second argument => returning null or an empty object is fine as
+ * connect automatically injects dispatch in the container component
+ */
+
+AddTodo = connect(
+	null,
+	null || {}
+)(AddTodo);
+
+AddTodo = connect()(AddTodo);
+
+
 
 // presentational component
 const Footer = () => {
 	return (
 		<p>
-			Show:{" "}
-			<FilterLink filter="SHOW_ALL">
-				All
-			</FilterLink>{" "}
-			<FilterLink filter="SHOW_ACTIVE">
-				Active
-			</FilterLink>{" "}
-			<FilterLink filter="SHOW_COMPLETED">
-				Completed
-			</FilterLink>
+			Show: <FilterLink filter="SHOW_ALL">All</FilterLink>{" "}
+			<FilterLink filter="SHOW_ACTIVE">Active</FilterLink>{" "}
+			<FilterLink filter="SHOW_COMPLETED">Completed</FilterLink>
 		</p>
 	);
 };
@@ -307,37 +344,37 @@ const Footer = () => {
  *  Presentational Component calculated from it. This props will
  * be updated any time the state changes.
  */
-const mapStateToProps = (state) => {
+const mapStateToTodoListProps = state => {
 	return {
 		todos: getVisibleTodos(state.todos, state.visibilityFilter)
 	};
 };
 
 /**
- * mapDispatchToProps => 
+ * mapDispatchToProps =>
  * 1> takes the store's dispatch method as the first argument.
  * 2> returns the props that use the dispatch method to dispatch actions
  */
-const mapDispatchToProps = (dispatch) => {
+const mapDispatchToTodoListProps = dispatch => {
 	return {
 		onTodoClick: id => {
 			return dispatch({
-				type: 'TOGGLE_TODO',
+				type: "TOGGLE_TODO",
 				id
-			})
+			});
 		}
 	};
 };
 
-/** connect function => generate the container component 
+/** connect function => generate the container component
  * 1> mapStateToProps as the first argument
  * 2> mapDispatchToProps as the second argument
- * 3> presentational component that passed an argument to curried 
+ * 3> presentational component that passed an argument to curried
  * function CONNECT
-*/
+ */
 const VisibleTodoList = connect(
-	mapStateToProps,
-	mapDispatchToProps
+	mapStateToTodoListProps,
+	mapDispatchToTodoListProps
 )(TodoList);
 
 let nextTodoId = 0;
@@ -352,7 +389,7 @@ const TodoApp = () => {
 	);
 };
 
-// polyfill for provider component in react-redux
+/** polyfill for provider component in react-redux */
 // class Provider extends React.Component {
 // 	getChildContext() {
 // 		return {
