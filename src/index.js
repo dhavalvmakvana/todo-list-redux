@@ -6,6 +6,7 @@ import expect from "expect";
 import deepFreeze from "deep-freeze";
 import { createStore, combineReducers } from "redux";
 import PropTypes from 'prop-types';
+import { Provider, connect } from 'react-redux';
 
 const todo = (state, action) => {
 	switch (action.type) {
@@ -268,38 +269,76 @@ const Footer = () => {
 	);
 };
 
-class VisibleTodoList extends React.Component {
-	componentDidMount() {
-		const { store } = this.context;
-		this.unsubscribe = store.subscribe(() => {
-			this.forceUpdate();
-		});
-	}
+// class VisibleTodoList extends React.Component {
+// 	componentDidMount() {
+// 		const { store } = this.context;
+// 		this.unsubscribe = store.subscribe(() => {
+// 			this.forceUpdate();
+// 		});
+// 	}
 
-	componentWillUnmount() {
-		this.unsubscribe();
-	}
+// 	componentWillUnmount() {
+// 		this.unsubscribe();
+// 	}
 
-	render() {
-		const props = this.props;
-		const { store } = this.context;
-		const state = store.getState();
-		return (
-			<TodoList
-				todos={getVisibleTodos(state.todos, state.visibilityFilter)}
-				onTodoClick={id =>
-					store.dispatch({
-						type: "TOGGLE_TODO",
-						id
-					})
-				}
-			/>
-		);
-	}
-}
-VisibleTodoList.contextTypes ={
-	store: PropTypes.object
+// 	render() {
+// 		const props = this.props;
+// 		const { store } = this.context;
+// 		const state = store.getState();
+// 		return (
+// 			<TodoList
+// 				todos={getVisibleTodos(state.todos, state.visibilityFilter)}
+// 				onTodoClick={id =>
+// 					store.dispatch({
+// 						type: "TOGGLE_TODO",
+// 						id
+// 					})
+// 				}
+// 			/>
+// 		);
+// 	}
+// }
+// VisibleTodoList.contextTypes ={
+// 	store: PropTypes.object
+// };
+
+/**
+ * mapStateToProps => maps the store state to the props of the
+ *  Presentational Component calculated from it. This props will
+ * be updated any time the state changes.
+ */
+const mapStateToProps = (state) => {
+	return {
+		todos: getVisibleTodos(state.todos, state.visibilityFilter)
+	};
 };
+
+/**
+ * mapDispatchToProps => 
+ * 1> takes the store's dispatch method as the first argument.
+ * 2> returns the props that use the dispatch method to dispatch actions
+ */
+const mapDispatchToProps = (dispatch) => {
+	return {
+		onTodoClick: id => {
+			return dispatch({
+				type: 'TOGGLE_TODO',
+				id
+			})
+		}
+	};
+};
+
+/** connect function => generate the container component 
+ * 1> mapStateToProps as the first argument
+ * 2> mapDispatchToProps as the second argument
+ * 3> presentational component that passed an argument to curried 
+ * function CONNECT
+*/
+const VisibleTodoList = connect(
+	mapStateToProps,
+	mapDispatchToProps
+)(TodoList);
 
 let nextTodoId = 0;
 // container component
@@ -313,20 +352,20 @@ const TodoApp = () => {
 	);
 };
 
-class Provider extends React.Component {
-	getChildContext() {
-		return {
-			store:  this.props.store
-		};
-	}
-	render() {
-		return this.props.children;
-	}
-}
-
-Provider.childContextTypes = {
-	store: PropTypes.object
-};
+// polyfill for provider component in react-redux
+// class Provider extends React.Component {
+// 	getChildContext() {
+// 		return {
+// 			store:  this.props.store
+// 		};
+// 	}
+// 	render() {
+// 		return this.props.children;
+// 	}
+// }
+// Provider.childContextTypes = {
+// 	store: PropTypes.object
+// };
 
 ReactDOM.render(
 	<Provider store={createStore(todoApp)}>
