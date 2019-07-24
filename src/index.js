@@ -4,7 +4,7 @@ import "./index.css";
 import * as serviceWorker from "./serviceWorker";
 import expect from "expect";
 import deepFreeze from "deep-freeze";
-import { createStore, combineReducers } from 'redux';
+import { createStore, combineReducers } from "redux";
 
 const todo = (state, action) => {
 	switch (action.type) {
@@ -39,13 +39,13 @@ const todos = (state = [], action) => {
 };
 
 const visibilityFilter = (state = "SHOW_ALL", action) => {
-    switch (action.type) {
-        case 'SET_VISIBILITY_FILTER':
-            return action.filter;
-        default:
-            return state;
-    }
-}
+	switch (action.type) {
+		case "SET_VISIBILITY_FILTER":
+			return action.filter;
+		default:
+			return state;
+	}
+};
 
 // const todoApp = (state = {}, action) => {
 //     return {
@@ -60,8 +60,8 @@ const visibilityFilter = (state = "SHOW_ALL", action) => {
 // });
 
 const todoApp = combineReducers({
-    todos,
-    visibilityFilter
+	todos,
+	visibilityFilter
 });
 
 const store = createStore(todoApp);
@@ -128,9 +128,45 @@ testAddTodo();
 testToggleTodo();
 console.log("All tests passed.");
 
-const TodoApp = () => <div>Initial Refactor Commit</div>;
+let nextTodoId = 0;
 
-ReactDOM.render(<TodoApp />, document.getElementById("root"));
+class TodoApp extends React.Component {
+	render() {
+		return (
+			<div>
+                <input
+                    ref={node => {
+                        this.input = node;
+                    }}
+                />
+				<button
+					onClick={() => {
+						store.dispatch({
+							type: "ADD_TODO",
+							text: this.input.value,
+							id: nextTodoId++
+                        });
+                        this.input.value = '';
+					}}
+				>
+					Add Todo
+				</button>
+				<ul>
+					{this.props.todos.map(todo => {
+						return <li key={todo.id}>{todo.text}</li>;
+					})}
+				</ul>
+			</div>
+		);
+	}
+}
+
+const render = () => {
+	ReactDOM.render(<TodoApp todos={store.getState().todos} />, document.getElementById("root"));
+};
+
+store.subscribe(render);
+render();
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.
