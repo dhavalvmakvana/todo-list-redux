@@ -64,9 +64,6 @@ const todoApp = combineReducers({
 	visibilityFilter
 });
 
-const store = createStore(todoApp);
-console.log(store.getState());
-
 const testAddTodo = () => {
 	const stateBefore = [];
 	const action = {
@@ -162,7 +159,7 @@ const Link = ({ active, children, onClick }) => {
 // Container component
 class FilterLink extends React.Component {
 	componentDidMount() {
-		this.unsubscribe = store.subscribe(() => {
+		this.unsubscribe = this.props.store.subscribe(() => {
 			this.forceUpdate();
 		});
 	}
@@ -173,6 +170,7 @@ class FilterLink extends React.Component {
 
 	render() {
 		const props = this.props;
+		const { store } =  this.props;
 		const state = store.getState();
 		return (
 			<Link
@@ -218,7 +216,7 @@ const TodoList = ({ todos, onTodoClick }) => {
 };
 
 //presentational component
-const AddTodo = () => {
+const AddTodo = ({ store }) => {
 	let input;
 
 	return (
@@ -245,19 +243,19 @@ const AddTodo = () => {
 };
 
 // presentational component
-const Footer = () => {
+const Footer = ({store}) => {
 	return (
 		<p>
-			Show: <FilterLink filter="SHOW_ALL">All</FilterLink>{" "}
-			<FilterLink filter="SHOW_ACTIVE">Active</FilterLink>{" "}
-			<FilterLink filter="SHOW_COMPLETED">Completed</FilterLink>
+			Show: <FilterLink store={store} filter="SHOW_ALL">All</FilterLink>{" "}
+			<FilterLink store={store} filter="SHOW_ACTIVE">Active</FilterLink>{" "}
+			<FilterLink store={store} filter="SHOW_COMPLETED">Completed</FilterLink>
 		</p>
 	);
 };
 
 class VisibleTodoList extends React.Component {
 	componentDidMount() {
-		this.unsubscribe = store.subscribe(() => {
+		this.unsubscribe = this.props.store.subscribe(() => {
 			this.forceUpdate();
 		});
 	}
@@ -268,6 +266,7 @@ class VisibleTodoList extends React.Component {
 
 	render() {
 		const props = this.props;
+		const { store } = this.props;
 		const state = store.getState();
 		return (
 			<TodoList
@@ -285,24 +284,24 @@ class VisibleTodoList extends React.Component {
 
 let nextTodoId = 0;
 // container component
-const TodoApp = () => {
+const TodoApp = ({ store }) => {
 	return (
 		<div>
-			<AddTodo />
-			<VisibleTodoList />
-			<Footer />
+			<AddTodo store={store} />
+			<VisibleTodoList store={store} />
+			<Footer store={store} />
 		</div>
 	);
 };
 
 const render = () => {
 	ReactDOM.render(
-		<TodoApp />,
+		<TodoApp store={createStore(todoApp)} />,
 		document.getElementById("root")
 	);
 };
 
-store.subscribe(render);
+// store.subscribe(render);
 render();
 
 // If you want your app to work offline and load faster, you can change
