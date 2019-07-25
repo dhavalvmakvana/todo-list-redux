@@ -9,27 +9,36 @@ import PropTypes from "prop-types";
 import { Provider, connect } from "react-redux";
 
 let nextTodoId = 0;
-const addTodo = text => {
-	return {
-		type: "ADD_TODO",
-		id: nextTodoId++,
-		text
-	};
-};
+// const addTodo = text => {
+// 	return {
+// 		type: "ADD_TODO",
+// 		id: nextTodoId++,
+// 		text
+// 	};
+// };
 
-const setVisibilityFilter = filter => {
-	return {
-		type: "SET_VISIBILITY_FILTER",
-		filter
-	};
-};
+/**
+ * Simplifying arrow functions with object expressions.
+ * Its important to wrap the object expression with parenthesis
+ * else it will be considered as a new BLock.
+ * This can be done only if the arrow function just returns an
+ * object.
+ */
+const addTodo = text => ({
+	type: "ADD_TODO",
+	id: nextTodoId++,
+	text
+});
 
-const toggleTodo = id => {
-	return {
-		type: "TOGGLE_TODO",
-		id
-	};
-};
+const setVisibilityFilter = filter => ({
+	type: "SET_VISIBILITY_FILTER",
+	filter
+});
+
+const toggleTodo = id => ({
+	type: "TOGGLE_TODO",
+	id
+});
 
 const todo = (state, action) => {
 	switch (action.type) {
@@ -218,19 +227,15 @@ const Link = ({ active, children, onClick }) => {
 // };
 
 /** Generating FilterLink container component from connect curried function */
-const mapStateToLinkProps = (state, ownProps) => {
-	return {
-		active: ownProps.filter === state.visibilityFilter
-	};
-};
+const mapStateToLinkProps = (state, ownProps) => ({
+	active: ownProps.filter === state.visibilityFilter
+});
 
-const mapDispatchToLinkProps = (dispatch, ownProps) => {
-	return {
-		onClick: () => {
-			dispatch(setVisibilityFilter(ownProps.filter));
-		}
-	};
-};
+const mapDispatchToLinkProps = (dispatch, ownProps) => ({
+	onClick: () => {
+		dispatch(setVisibilityFilter(ownProps.filter));
+	}
+});
 
 const FilterLink = connect(
 	mapStateToLinkProps,
@@ -381,24 +386,31 @@ const Footer = () => {
  *  Presentational Component calculated from it. This props will
  * be updated any time the state changes.
  */
-const mapStateToTodoListProps = state => {
-	return {
-		todos: getVisibleTodos(state.todos, state.visibilityFilter)
-	};
-};
+const mapStateToTodoListProps = state => ({
+	todos: getVisibleTodos(state.todos, state.visibilityFilter)
+});
 
 /**
  * mapDispatchToProps =>
  * 1> takes the store's dispatch method as the first argument.
  * 2> returns the props that use the dispatch method to dispatch actions
  */
-const mapDispatchToTodoListProps = dispatch => {
-	return {
-		onTodoClick: id => {
-			return dispatch(toggleTodo(id));
-		}
-	};
-};
+// const mapDispatchToTodoListProps = dispatch => {
+// 	return {
+// 		onTodoClick: id => {
+// 		return dispatch(toggleTodo(id));
+// 	}
+// };
+
+/**
+ * Concise method notation for defining functions.
+ * It is available when a function is defined inside an object.
+ */
+const mapDispatchToTodoListProps = dispatch => ({
+		onTodoClick(id) {
+			dispatch(toggleTodo(id))
+		},
+});
 
 /** connect function => generate the container component
  * 1> mapStateToProps as the first argument
